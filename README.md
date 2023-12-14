@@ -7,6 +7,9 @@ I investigated the link between pipe wall thickness and acoustic signal monitori
 - Raspberry pi or Linux system(optional)
 - GL-net mini smart wifi router(optional)
 - 2 micro sub cables
+
+# Wiring Layout:
+![image](https://github.com/rorybateman/SIOT-Coursework/assets/70752417/94767a2a-88df-46bf-bc7a-9e47f521cc16)
 # Custom installation tools
 ## CMAKe
 To program the Raspberry Pi with c programming you must configure Cmake build tools on your system. I would advise that you do this on a Linux-based system as the installation is much simpler. If you would like you can also configure it with Visual Studio however I found it easier to make edits on my PC before pushing it to GitHub and pull that change onto my Pi(4GB) where I would run all the necessary cmake configurations locally before dropping the UF2 file onto the Pico. Raspberry Pi has released a really good resource for getting started I would recommend it to anyone like myself who hasn't used or interacted with this before.
