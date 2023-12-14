@@ -1,0 +1,316 @@
+#include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
+#include <time.h>
+
+int8_t TIME_ZONE = -5;
+#include <pgmspace.h>
+ 
+
+const char WIFI_SSID[] = "yourssid";               //TAMIM2.4G
+const char WIFI_PASSWORD[] = "yourpasssword";           //0544287380
+
+#define THINGNAME "ACthing"
+ 
+//int8_t TIME_ZONE = -5; //NYC(USA): -5 UTC
+ 
+const char MQTT_HOST[] = "yourhostid";
+ 
+ 
+static const char cacert[] PROGMEM = R"EOF(
+-----BEGIN CERTIFICATE-----
+
+-----END CERTIFICATE-----
+
+)EOF";
+ 
+ 
+// Copy contents from XXXXXXXX-certificate.pem.crt here ▼
+static const char client_cert[] PROGMEM = R"KEY(
+-----BEGIN CERTIFICATE-----
+
+-----END CERTIFICATE-----
+
+ 
+)KEY";
+ 
+ 
+// Copy contents from  XXXXXXXX-private.pem.key here ▼
+static const char privkey[] PROGMEM = R"KEY(
+-----BEGIN RSA PRIVATE KEY-----
+
+-----END RSA PRIVATE KEY-----
+ 
+)KEY";
+//#define DHTPIN 4        // Digital pin connected to the DHT sensor
+//#define DHTTYPE DHT11   // DHT 11
+ 
+//DHT dht(DHTPIN, DHTTYPE);
+ 
+float h ;
+float t;
+float g;
+unsigned long lastMillis = 0;
+unsigned long previousMillis = 0;
+const long interval = 5000;
+ 
+#define AWS_IOT_PUBLISH_TOPIC   "ACthing/pub"
+#define AWS_IOT_SUBSCRIBE_TOPIC "ACthing/sub"
+ 
+WiFiClientSecure net;
+ 
+BearSSL::X509List cert(cacert);
+BearSSL::X509List client_crt(client_cert);
+BearSSL::PrivateKey key(privkey);
+ 
+PubSubClient client(net);
+ 
+time_t now;
+time_t nowish = 1510592825;
+ 
+ 
+void NTPConnect(void)
+{
+  Serial.print("Setting time using SNTP");
+  configTime(TIME_ZONE * 3600, 0 * 3600, "pool.ntp.org", "time.nist.gov");
+  now = time(nullptr);
+  while (now < nowish)
+  {
+    delay(500);
+    Serial.print(".");
+    now = time(nullptr);
+  }
+  Serial.println("done!");
+  struct tm timeinfo;
+  gmtime_r(&now, &timeinfo);
+  Serial.print("Current time: ");
+  Serial.print(asctime(&timeinfo));
+}
+ 
+ 
+void messageReceived(char *topic, byte *payload, unsigned int length)
+{
+  Serial.print("Received [");
+  Serial.print(topic);
+  Serial.print("]: ");
+  for (int i = 0; i < length; i++)
+  {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+}
+ 
+ 
+void connectAWS()
+{
+  delay(3000);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+ 
+  Serial.println(String("Attempting to connect to SSID: ") + String(WIFI_SSID));
+ 
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(1000);
+  }
+ 
+  NTPConnect();
+ 
+  net.setTrustAnchors(&cert);
+  net.setClientRSACert(&client_crt, &key);
+ 
+  client.setServer(MQTT_HOST, 8883);
+  client.setCallback(messageReceived);
+ 
+ 
+  Serial.println("Connecting to AWS IOT");
+ 
+  while (!client.connect(THINGNAME))
+  {
+    Serial.print(".");
+    delay(1000);
+  }
+ 
+  if (!client.connected()) {
+    Serial.println("AWS IoT Timeout!");
+    return;
+  }
+  // Subscribe to a topic
+  client.subscribe(AWS_IOT_SUBSCRIBE_TOPIC);
+ 
+  Serial.println("AWS IoT Connected!");
+}
+ 
+ 
+void publishMessage()
+{
+  StaticJsonDocument<200> doc;
+  doc["epoch"] = now*1000;
+  doc["frequency"] = h;
+  doc["powerpos"] = t;
+  doc["gain"] = g;
+  char jsonBuffer[512];
+  serializeJson(doc, jsonBuffer); // print to client
+ 
+  client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer);
+}
+ 
+ 
+void setup()
+{
+  Serial.begin(115200);
+  connectAWS();
+  //dht.begin();
+}
+ 
+ 
+void loop()
+{
+
+  int count =0;
+    String distance = "";
+    Serial.readStringUntil('e');
+    Serial.readStringUntil('b');
+    distance = Serial.readStringUntil('e');
+    Serial.print(distance);
+    g = 0;
+    int i =0;
+    int ind2 = 0;
+    char ch = 't';
+    char ch2 = ',';
+    int indc1;
+    int indc2;
+    int indc3;
+    int y = 0;
+    i = 0;
+    for (i = 0; i < distance.length(); i++) {
+    //for (i = 0; i < 200; i++) {
+      if( distance[i] == ch){
+        count = count +1;
+        if( count >= 2){
+          int ind1 = ind2;
+          ind2 = i;
+          int count2 = 0;
+          y = 0;
+          int key = 0;
+          while(count2<=3){
+          for (y = 0; y < ind2-ind1; y++){
+              if( distance[ind1+y] == ch2){
+                count2 = count2 +1;
+                if( count2 >= 2){
+                  if( count2 >= 3){
+                    indc1 = indc2;
+                    indc2 = indc3;
+                    indc3 = y+ind1;
+                    int z = 0;
+                    int count3 = 0;
+                    int count4 = 0;
+                    int count5 = 0;
+                    int count6 = 0;
+                    int count7 = 0;
+                    char total[ind2-ind1];
+                    char index[indc1-ind1-1];
+                    char strepos[indc2-indc1-1];
+                    char stresposact[1];
+                    int num = indc3 -indc2;
+                    char freq[num];
+                    char gain[ind2-indc3];
+                    for (z = 0; z < ind2-ind1-1; z++){
+                      total[z] =distance[ind1 + z+ 1];
+                      count4 = count4 +1;
+                      }
+                    Serial.println("");
+                    Serial.println(total);
+                    z = 0;
+                    while(z < count4){
+                      if( total[z] == ch2){
+                        count3 = count3 +1;
+                        key =1;
+                      }
+                      if( count3 == 0 && key ==0){
+                        index[z] = total[z];
+                        count5 = count5 + 1;
+                      }
+                      if( count3 == 1 && key ==0){
+                        if(count6 < 4){
+                          strepos[z-count5 - count3] = total[z];
+                        }
+                        count6 = count6 +1;
+                      }
+                      if( count3 == 2 && key ==0){
+                        freq[z-count6 - count5 - count3] = total[z];
+                        count7 = count7 +1;
+                      }
+                      if( count3 == 3 && key ==0){
+                        gain[z - count7 - count6 - count5 - count3] = total[z];
+                      }
+                      z = z + 1;
+                      key = 0;
+                    }
+                    Serial.println("strepos");
+                    stresposact[0] = strepos[0];
+                    int int1 = atoi(stresposact);
+                    t = int1;
+                    if (t == 6){
+                      i = 100000000;
+                    }
+                    Serial.println(t);
+                    Serial.println("freq");
+                    //int int2 = freq[0] - '0';
+                    int int2 = atoi(freq);
+                    h = int2;
+                    Serial.println(h);
+                    Serial.println("gain");
+                    int int3 = atoi(gain);
+                    g = int3;
+                    Serial.println(g);
+                    y = 100000000000000;
+                    count2 = 5;
+                    count = 0;
+                    //i = 100000;
+  if (isnan(h) || isnan(t) )  // Check if any reads failed and exit early (to try again).
+  {
+    Serial.println(F("Failed to read from DHT sensor!"));
+    return;
+  }
+  
+  
+  Serial.print(F("frequency: "));
+  Serial.print(h);
+  Serial.print(F("%  Power pos: "));
+  Serial.print(t);
+  Serial.print(F("%  Gain: "));
+  Serial.print(g);
+  Serial.println(F("°C "));
+  delay(200);
+  now = time(nullptr);
+  
+  if (!client.connected())
+  {
+    connectAWS();
+  }
+  else
+  {
+    client.loop();
+    if (millis() - lastMillis > 200)
+    {
+      lastMillis = millis();
+      publishMessage();
+    }
+  }
+                    }
+                  indc2 = indc3;
+                  indc3 = y+ind1;
+                }
+                indc3 = y+ind1; 
+              }
+            }
+          }
+            count = 0;
+        }
+        ind2 = i;
+      }  
+ }
+}
