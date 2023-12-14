@@ -30,7 +30,9 @@ I would advise it if it's your first time using AWS. The only thing is that I re
 Because the serial read in as a string how I break down the code can get a little confusing so I have attached a key above to help explain.
 # AWS
 The AWS is configured with the following flow: 
+
 ![image](https://github.com/rorybateman/SIOT-Coursework/assets/70752417/88732408-3af7-4838-942c-83fa515b6c66)
+
 I would advise following these tutorials if you want to recreate a system like this:
 
 -MQTT to the time stream:https://www.youtube.com/watch?v=z8T4hAERuOg&t=629s
