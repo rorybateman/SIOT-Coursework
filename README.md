@@ -22,5 +22,23 @@ That code is again an adaptation of what exists within the examples provided by 
 If you don't fuss about it and just get something working I would recommend Alex Wulf's guide however it is very easy to make a mistake so I'd say its worth going through the Raspberry Pi resource as well. The changes I have made to the code have mostly been in the ADC.FFT file so if you want to make a quick change to the serial formatting do it in there, and then follow Alex Wulf's tutorial on how to update the UF2 file.
 ## NodeMCU's code:
 The NodeMCU effectively reads the string supplied by the serial port before cutting this data packet up into its frequency components and sending it to AWS through an MQTT broker.
-I set up the MQTT broker following this tutorial:
+I set up the MQTT broker following this tutorial:https://how2electronics.com/connecting-esp8266-to-amazon-aws-iot-core-using-mqtt/
 I would advise it if it's your first time using AWS. The only thing is that I removed the secret file from the Arduino sketch and copied the key assignments directly into the main script. This was just because I found that it produced errors when uploading it to my NodeMCU.
+Because the serial read in as a string how I break down the code can get a little confusing so I have attached a key above to help explain.
+# AWS
+The AWS is configured with the following flow: 
+![image](https://github.com/rorybateman/SIOT-Coursework/assets/70752417/88732408-3af7-4838-942c-83fa515b6c66)
+I would advise following these tutorials if you want to recreate a system like this:
+
+-MQTT to the time stream:https://www.youtube.com/watch?v=z8T4hAERuOg&t=629s
+-Timstream to Grafana: [https://www.youtube.com/watch?v=z8T4hAERuOg&t=629s](https://www.youtube.com/watch?v=HuJycX1NEso)
+Additional notes on this, when setting up Grafana you have to install the Timestream plugin, and to do this you have to set your workspace to allow default users admin privileges.
+-SNS to SMS:https://www.youtube.com/watch?v=XRJBFWlOSJ8
+This one is for email but you can easily alter it to mobile.
+
+Here are some images of how I set up my Grafana page too as there the information online is fairly spread out.
+![image](https://github.com/rorybateman/SIOT-Coursework/assets/70752417/5b8e33a9-c6af-4fff-9655-a039132243cb)
+![image](https://github.com/rorybateman/SIOT-Coursework/assets/70752417/7559e1ba-0473-4553-a577-c55c7e5685da)
+
+# Thankyou
+Thanks for following along hopefully some of this information helps you with your own IOT endavours :).
